@@ -362,12 +362,16 @@ declare module "alt-server" {
     entityEnterColshape: (colshape: Colshape, entity: Entity) => void;
     entityLeaveColshape: (colshape: Colshape, entity: Entity) => void;
     explosion: (source: Player, type: ExplosionType, pos: Vector3, fx: number, target: Entity) => boolean | void;
-    playerChangeVehicleSeat: (player: Player, vehicle: Vehicle, oldSeat: number, newSeat: number) => void;
+    /** @beta */
+    netOwnerChange: (entity: Entity, owner: Player, oldOwner: Player) => void;
+    playerChangedVehicleSeat: (player: Player, vehicle: Vehicle, oldSeat: number, seat: number) => void;
     playerConnect: (player: Player) => void;
     playerDamage: (victim: Player, attacker: Entity, damage: number, weaponHash: number) => void;
     playerDeath: (victim: Player, killer: Entity, weaponHash: number) => void;
     playerDisconnect: (player: Player, reason: string) => void;
     playerEnteredVehicle: (player: Player, vehicle: Vehicle, seat: number) => void;
+    /** @beta */
+    playerEnteringVehicle: (player: Player, vehicle: Vehicle, seat: number) => void;
     playerLeftVehicle: (player: Player, vehicle: Vehicle, seat: number) => void;
     removeEntity: (object: BaseObject) => void;
     resourceStart: (errored: boolean) => void;
@@ -376,19 +380,21 @@ declare module "alt-server" {
     streamSyncedMetaChange: (entity: Entity, key: string, value: any, oldValue: any) => void;
     globalMetaChange: (key: string, value: any, oldValue: any) => void;
     globalSyncedMetaChange: (key: string, value: any, oldValue: any) => void;
+    /** @beta */
+    vehicleAttach: (vehicle: Vehicle, attachedVehicle: Vehicle) => void;
     vehicleDestroy: (vehicle: Vehicle) => void;
+    /** @beta */
+    vehicleDetach: (vehicle: Vehicle, detachedVehicle: Vehicle) => void;
     weaponDamage: (source: Player, target: Entity, weaponHash: number, damage: number, offset: Vector3, bodyPart: BodyPart) => boolean | void;
     /** @beta */
     startFire: (player: Player, fires: Array<IFireInfo>) => boolean | void;
     /** @beta */
     startProjectile: (player: Player, pos: Vector3, dir: Vector3, ammoHash: number, weaponHash: number) => boolean | void;
     /** @beta */
-    playerWeaponChange: (player: Player, oldWeapon: number, newWeapon: number) => void;
+    playerWeaponChange: (player: Player, oldWeapon: number, weapon: number) => void;
   }
 
-  /**
-   * @beta
-   */
+  /** @beta */
   export interface IFireInfo {
     pos: Vector3;
     weapon: number;
@@ -410,12 +416,50 @@ declare module "alt-server" {
   }
 
   /**
-   * Resource name of the executing entity
+   * Resource name of the executing entity.
    */
   export const resourceName: string;
+
   export const rootDir: string;
+
+  /**
+   * @deprecated This variable was renamed to {@link defaultDimension} on the other branches than release.
+   */
+  export const DefaultDimension: number;
+
+  /** @beta */
   export const defaultDimension: number;
+
+  /**
+   * @deprecated This variable was renamed to {@link globalDimension} on the other branches than release.
+   */
+  export const GlobalDimension: number;
+
+  /** @beta */
   export const globalDimension: number;
+
+  /**
+   * Represents the current server version.
+   *
+   * @remarks It's a slighty modified semantic versioning specification, which can be matched using this regular expression pattern `^(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))$`.
+   * @beta
+   */
+  export const version: string;
+
+  /**
+   * Represents the current server SDK version.
+   *
+   * @remarks It's the version of the SDK the current runtime was compiled with.
+   * @beta
+   */
+  export const sdkVersion: number;
+
+  /**
+   * Represents the current server branch.
+   *
+   * @beta
+   */
+  export const branch: string;
 
   export class Vector3 {
     public readonly x: number;
@@ -430,31 +474,82 @@ declare module "alt-server" {
 
     constructor(obj: IVector3);
 
+    /** @beta */
     public get length(): number;
+
+    /** @beta */
     public toArray(): [number, number, number];
+
+    /** @beta */
     public add(x: number, y: number, z: number): Vector3;
+
+    /** @beta */
     public add(value: number): Vector3;
+
+    /** @beta */
     public add(array: [number, number, number]): Vector3;
+
+    /** @beta */
     public add(vector: IVector3): Vector3;
+
+    /** @beta */
     public sub(x: number, y: number, z: number): Vector3;
+
+    /** @beta */
     public sub(value: number): Vector3;
+
+    /** @beta */
     public sub(array: [number, number, number]): Vector3;
+
+    /** @beta */
     public sub(vector: IVector3): Vector3;
+
+    /** @beta */
     public div(x: number, y: number, z: number): Vector3;
+
+    /** @beta */
     public div(value: number): Vector3;
+
+    /** @beta */
     public div(array: [number, number, number]): Vector3;
+
+    /** @beta */
     public div(vector: IVector3): Vector3;
+
+    /** @beta */
     public mul(x: number, y: number, z: number): Vector3;
+
+    /** @beta */
     public mul(value: number): Vector3;
+
+    /** @beta */
     public mul(array: [number, number, number]): Vector3;
+
+    /** @beta */
     public mul(vector: IVector3): Vector3;
+
+    /** @beta */
     public negative(): Vector3;
+
+    /** @beta */
     public normalize(): Vector3;
+
+    /** @beta */
     public distanceTo(vector: IVector3): Vector3;
+
+    /** @beta */
     public angleTo(vector: IVector3): Vector3;
+
+    /** @beta */
     public angleToDegrees(vector: IVector3): Vector3;
+
+    /** @beta */
     public toRadians(): Vector3;
+
+    /** @beta */
     public toDegrees(): Vector3;
+
+    /** @beta */
     public isInRange(vector: IVector3, range: number): boolean;
   }
 
@@ -529,6 +624,9 @@ declare module "alt-server" {
   }
 
   export class Entity extends WorldObject {
+    /** @beta */
+    public static readonly all: Array<Entity>;
+
     /**
      * Internal identificator of the entity which is identical on both sides.
      */
@@ -557,6 +655,9 @@ declare module "alt-server" {
      * @remarks Values are provided in radians .
      */
     public rot: Vector3;
+
+    /** @beta */
+    public visible: boolean;
 
     /**
      * Retrieves the entity from the pool.
@@ -690,6 +791,9 @@ declare module "alt-server" {
 
     public addWeaponComponent(weaponHash: number, component: number): void;
 
+    /** @beta */
+    public clearBloodDamage(): void;
+
     public giveWeapon(weaponHash: number, ammo: number, equipNow: boolean): void;
 
     /**
@@ -783,6 +887,12 @@ declare module "alt-server" {
 
     public getAppearanceDataBase64(): string;
 
+    /** @beta */
+    public getAttached(): Vehicle;
+
+    /** @beta */
+    public getAttachedTo(): Vehicle;
+
     public getArmoredWindowHealth(windowId: number): number;
 
     public getArmoredWindowShootCount(windowId: number): number;
@@ -824,6 +934,9 @@ declare module "alt-server" {
     public isWindowDamaged(windowId: number): boolean;
 
     public isWindowOpened(windowId: number): boolean;
+
+    /** @beta */
+    public repair(): void;
 
     public setAppearanceDataBase64(data: string): void;
 
@@ -1145,6 +1258,9 @@ declare module "alt-server" {
    */
   export function on<K extends keyof IServerEvent>(eventName: K, listener: IServerEvent[K]): void;
 
+  /** @beta */
+  export function once<K extends keyof IServerEvent>(eventName: K, listener: IServerEvent[K]): void;
+
   /**
    * Subscribes to server event handler with specified listener.
    *
@@ -1153,6 +1269,9 @@ declare module "alt-server" {
    */
   export function on<S extends string>(event: Exclude<S, keyof IServerEvent>, listener: (...args: any[]) => boolean | void | Promise<boolean | void>): void;
 
+  /** @beta */
+  export function once<S extends string>(event: Exclude<S, keyof IServerEvent>, listener: (...args: any[]) => boolean | void | Promise<boolean | void>): void;
+
   /**
    * Subscribes to client event handler with specified listener.
    *
@@ -1160,6 +1279,9 @@ declare module "alt-server" {
    * @param listener Listener that should be added.
    */
   export function onClient(eventName: string, listener: (player: Player, ...args: any[]) => void): void;
+
+  /** @beta */
+  export function onceClient(eventName: string, listener: (player: Player, ...args: any[]) => void): void;
 
   export function restartResource(name: string): void;
 

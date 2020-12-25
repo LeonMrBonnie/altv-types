@@ -12,8 +12,8 @@ on:
       - 'docs/filterConfig.yml'
       - 'docs/index.md'
       - 'docs/toc.yml'
-      - 'client/**.d.ts'
-      - 'server/**.d.ts'
+      - 'client/package.json'
+      - 'server/package.json'
       - '!docs/build.*'
       - '!docs/.gitignore'
 jobs:
